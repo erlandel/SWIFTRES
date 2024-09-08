@@ -1,19 +1,18 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 
 
 import { alertMessage } from '../messages/alertMessage';
 import { errorMessage } from '../messages/errorMessage';
 import { ToastContainerMessage } from '../messages/ToastContainerMessage';
 import { correct } from '../messages/correct';
-import { postData } from '../../hooks/usePostData';
 import '../../styles/userActions.css'
+import axios from 'axios';
 
 export const FlightReservation = () => {
  const navigate = useNavigate();
  const flightData = useSelector(state => state.flights);
- const dispatch = useDispatch();
  const { email } = useSelector(state => state.auth);
 
 
@@ -25,19 +24,37 @@ export const FlightReservation = () => {
   try {
     const responseUser = await alertMessage('¿Está seguro que desea realizar esta reserva?');
     if (responseUser) {
-      const id=flightData.id;
-      const dataObject = { id, email }; 
-      const url = "/api/authenticate";
-      const response = await dispatch(postData({ url, data: dataObject }));
+      const idFlight=flightData.idFlight;
       
-      if (response.status===200) {
-        correct('Reserva realizada exitosamente!');
-        setTimeout(() => {
-          navigate('/User/UserFlightList');
-        }, 5000);
-      } else {       
+      const dataObject = { 
+        idFlight: idFlight, 
+        email: email
+       }; 
+
+      const url = "http://localhost:5167/CreateReservation";      
+      
+      try {
+        const response = await axios.post(url,dataObject, {        
+          headers: {          
+            'Content-Type': 'application/json',
+          },
+        });      
+        
+  
+        if (response.status===200) {
+          correct('Reserva realizada exitosamente!');
+          setTimeout(() => {
+            navigate('/User/UserFlightList');
+          }, 5000);
+        } else {   
+          errorMessage('Error al realizar la reserva.');
+        }        
+      } catch (error) {
         errorMessage('Error al realizar la reserva.');
+          
+        console.log(error);
       }
+     
     }
   } catch (error) {
     console.error('Error al confirmar la reserva:', error);

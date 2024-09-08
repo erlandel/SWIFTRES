@@ -1,28 +1,46 @@
 import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 
 import { correct } from '../messages/correct';
 import { errorMessage } from '../messages/errorMessage';
 import { ToastContainerMessage } from '../messages/ToastContainerMessage';
-import { deleteData } from '../../hooks/useDeleteData';
+
+import { alertMessage } from '../messages/alertMessage';
+import axios from 'axios';
 
 
 export const ReservedFlights = ({ flights }) => {
-const email=useSelector((state) => state.auth.email);
-const dispatch = useDispatch();
+
+
 
 
   const handleCancelClick = async (flight) => {
-        const id=flight.id;
-        const dataObject={id,email}
-        const url = "/api/authenticate";
-      const response = await dispatch(deleteData({ url, data: dataObject }));
-  if(!response){      
-      correct('Reserva cancelada!');
-  }else{    
-    errorMessage('Error al cancelar reserva!');
-  }
+    const responseUser = await alertMessage("¿Está seguro que desea cancelar esta reserva?")
+  
 
+    if (responseUser) {
+      const id = flight.id;
+      const url = "http://localhost:5167/RemoveReservation/"+id;
+
+      try {
+        const response = await axios.delete(url, {            
+          headers: {              
+            'Content-Type': 'application/json',
+          },
+        });
+        if (response.status===200) {
+          correct("Reserva cancelada!");
+          setTimeout(() => {
+            window.location.reload();
+          }, 5000);
+        } else {
+          errorMessage("Error al cancelar reserva!");
+        }
+      } catch (error) {
+        console.log(error);
+        errorMessage("Error al cancelar reserva!");
+      }
+     
+    }
   };
 
   const chunkArray = (arr, size) => {
@@ -45,10 +63,10 @@ const dispatch = useDispatch();
                 <div className="card-body d-flex justify-content-between align-items-center ">
                   <div>
                     <h6 className="card-title">Origen: {flight.origin}</h6>
-                    <h6 className="card-title">Destino: {flight.destination}</h6>
-                    <p className="card-text mb-1">Fecha: {flight.date}</p>
+                    <h6 className="card-title">Destino: {flight.destinity}</h6>
+                    <p className="card-text mb-1">Fecha: {flight.dateTime}</p>
                     <p className="card-text mb-1">Hora de salida: {flight.departureTime}</p>
-                    <p className="card-text mb-1">Hora de llegada: {flight.arrivalTime}</p>
+                    <p className="card-text mb-1">Hora de llegada: {flight.arriveTime}</p>
                     <p className="card-text mb-1">Asiento: {flight.seat}</p>
                   </div>
                   <div className="d-flex flex-column align-items-center justify-content-center">

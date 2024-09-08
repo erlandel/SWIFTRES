@@ -7,7 +7,7 @@ export const ProtectedRouterAdmin = () => {
         
     if(!isAuthenticated){
      return <Navigate to="/Login" /> 
-    }else if(role !== 'administrator'){
+    }else if(role !== 'Admin'){
       return <Navigate to="/" />
     }     
     return <Outlet />

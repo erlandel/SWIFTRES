@@ -1,31 +1,40 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
 
 import { handleKeyDownCode } from "../../functionValidation/handleKeyDownCode";
 import { errorMessage } from "../messages/errorMessage";
 import { ToastContainerMessage } from "../messages/ToastContainerMessage";
-import { postData } from "../../hooks/usePostData";
+
 import "../../styles/login.css";
+import axios from "axios";
 
 export const CodePassword = () => {
   const [code, setCode] = useState("");
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+
 
   const handleCode = async (e) => {
     e.preventDefault();
 
-    const url = "/api/authenticate";
-    const dataObjects = { code };
+    const url = "http://localhost:5167/api/User/ConfirmChangeToken";    
 
-    const response = await dispatch(postData({ url,data:dataObjects }));
+    try {
+      const response = await axios.post(url, code, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
 
-    if (response.status === 200) {
-      navigate("/ChangePassword");
-    } else {
-      errorMessage("Codigo inválido!");
+      if (response.status === 200) {
+        navigate("/ChangePassword");
+      } else {
+        errorMessage("Codigo inválido!");
+      }
+    } catch (error) {
+      
     }
+
+    
   };
 
   const handleInputChange = (e) => {

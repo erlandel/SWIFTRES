@@ -1,37 +1,40 @@
 import React, { useState } from 'react'
-import { Link} from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import { Link, useNavigate} from 'react-router-dom';
 
 import { errorMessage } from '../messages/errorMessage';
 import { correct } from '../messages/correct';
 import { handleKeyDownString } from '../../functionValidation/handleKeyDownString';
 import { handleKeyDownNumber } from '../../functionValidation/handleKeyDownNumber';
-import { postData } from '../../hooks/usePostData';
 import{ToastContainerMessage} from '../messages/ToastContainerMessage'
+import axios from 'axios';
+import { useSelector } from 'react-redux';
 
 export const AddFlight = () => {
 
-  const dispatch=useDispatch();
+  const email=useSelector(state=>state.auth.email)
+  const navegate = useNavigate();
+ 
 
-  const [valueForm, setValueForm] = useState({
+
+  const [valueForm, setValueForm] = useState({   
     origin: '',
-    destination: '',   
-    date: '',
-    departureTime:'',
-    arrivalTime: '',
+    destinity: '',
+    dateTime: '',
+    departureTime: '',
+    arriveTime: '',
     price: '',   
     capacity: '',
- });
+  });
 
- const [validationState, setValidationState] = useState({
-  origin:null,
-  destination: null,   
-  date: null,
-  departureTime:null,
-  arrivalTime: null,
-  price: null,  
-  capacity: null,
- });
+  const [validationState, setValidationState] = useState({
+    origin: true,
+    destinity: true,   
+    dateTime: true,
+    departureTime:true,
+    arriveTime: true,
+    price: true,  
+    capacity: true,
+   });
 
  const handleInputChange = (event) => {
   const { name, value } = event.target;
@@ -65,14 +68,12 @@ const handleSubmit = async (event) => {
 
   const isFormValid = Object.values(validationState).every((field) => field === true);
   
-  if (!isFormValid) {         
-      // Itera sobre cada propiedad del objeto validationState
-      Object.entries(validationState).forEach(([key, value]) => {
-        // Si el valor es null, lo cambia a false
+  if (!isFormValid) {        
+      Object.entries(validationState).forEach(([key, value]) => {        
         if (value === null) {
           setValidationState(prevState => ({
-           ...prevState, // Mantiene el estado anterior
-            [key]: false, // Actualiza la propiedad actual a false
+           ...prevState, 
+            [key]: false, 
           }));
         }
       });
@@ -81,16 +82,35 @@ const handleSubmit = async (event) => {
     return; 
   }   
   
+  const url = `http://localhost:5167/api/Flight/CreateFlight`;    
 
-  const url = "/api/authenticate";  
 
-  const response = await dispatch(postData({ url,data:valueForm }));
- 
-  if(response.status===200){
-   
-    correct('Vuelo agregado con exito!');  
+  const Flig={
+    adminEmail: email,
+    origin: valueForm.origin,
+    destinity: valueForm.destination,
+    capacity: valueForm.capacity,
+    dateTime: valueForm.date,
+    departureTime: valueForm.departureTime,
+    arriveTime: valueForm.arrivalTime,
+    price: valueForm.price
+  }
+
+  const response = await axios.post(url,Flig,{
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('token')}`,
+      'Content-Type': 'application/json',
+    },
+  }); 
+
+
+  if(response.status === 200){   
+    correct('Vuelo agregado con exito!'); 
+    setTimeout(() => {      
+      navegate('/Employee/FlightCard') 
+    }, 5000);
   }else{   
-    errorMessage('Registro incorrecto!');
+    errorMessage('Error al agregar vuelo!');
   }    
 };
 

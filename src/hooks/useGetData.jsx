@@ -3,7 +3,8 @@ import axios from "axios";
 
 export const getData = createAsyncThunk(
   "data/getData",
-  async ({url}) => {        
+  async ({ url }) => {       
+    console.log(url)
     try {
       const response = await axios.get(url);
       return response; 

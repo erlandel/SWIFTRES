@@ -8,10 +8,11 @@ import { validatePassword } from '../../functionValidation/validatePassword';
 import { validateEmail } from '../../functionValidation/validateEmail';
 import { ToastContainerMessage } from '../messages/ToastContainerMessage';
 import { errorMessage } from '../messages/errorMessage';
-import { postData } from '../../hooks/usePostData';
+/* import { postData } from '../../hooks/usePostData'; */
 import { correct } from '../messages/correct';
 import { setLogin } from '../../slice/authSlice';
 import '../../styles/login.css'
+import axios from 'axios';
 
 
 
@@ -22,8 +23,8 @@ export const Login = () => {
  const { showPassword, toggleShowPassword } = useToggleShowPassword();
 
  const [formValues, handleInputChange] = useForm({
-    email: 'mario@gmail.com',
-    password: 'Mar#2002'
+    email: '',
+    password:'' 
  });
 
  const { email, password } = formValues;
@@ -44,29 +45,39 @@ export const Login = () => {
         message='Contraseña inválida!';
         errorMessage(message);   
         return; 
-      }   
+      }       
+        const url='http://localhost:5167/api/User/login';
+        let dataObjects = { email, password };
 
-      const url='/api/authenticate';
-      let dataObjects = { email, password };
-      const response = await dispatch(postData({ url, data: dataObjects }));
-
+        try {
+        const response = await axios.post(url, dataObjects, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });      
       
+        if (response.status === 200 ) {
+          correct("Inicio de sesión exitoso!");
+          const {role, isAuthenticated, token} = response.data;         
+        
+          localStorage.setItem('token', token);
+ 
+          dispatch(setLogin({ email, role, isAuthenticated }));         
+ 
+          setTimeout(() => {
+            navigate("/");
+          },500);
+        } else {
+           errorMessage("Credenciales inválidas!"); 
+        } 
+      
+        
+      } catch(error) {
 
-       if (response.status === 200) {
-
-         correct("Inicio de sesión exitoso!");
-
-         const { email, name, role, isAuthenticated, error } = response.data;
-    
-         dispatch(setLogin({ email, name, role, isAuthenticated, error }));
-
-         setTimeout(() => {
-           navigate("/HomeApp");
-         },500);
-       } else {
-         errorMessage("Credenciales inválidas!");
-       } 
+        console.log(error)
+      }     
      
+ 
  };
 
  return (

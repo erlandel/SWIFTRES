@@ -1,44 +1,50 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
-
-import { flightsData } from '../userActions/functionUser/FlightsData';
+import { useDispatch, useSelector } from 'react-redux';
 
 import { correct } from '../messages/correct';
 import { ToastContainerMessage } from '../messages/ToastContainerMessage';
 import { errorMessage } from '../messages/errorMessage';
 import { setFlightsData } from '../../slice/flightsSlice';
-import { deleteData } from '../../hooks/useDeleteData';
-import { getData } from '../../hooks/useGetData';
 import '../../styles/userActions.css';
+import { alertMessage } from '../messages/alertMessage';
+import axios from 'axios';
 
 
 
 export const FlightCard =  () => {
-  const flightsRef = useRef(flightsData);
+  const flightsRef = useRef();
   const [flights, setFlights] = useState([]);
   const navegate = useNavigate();
   const dispatch = useDispatch();
+  const adminEmail=useSelector(state=>state.auth.email)
 
 
   useEffect(() => {
     const getFlights = async () => {
       try {
-          const url = "/api/authenticate";
-          const response = await dispatch(getData({ url }));
+          const url = "http://localhost:5167/api/Flight/GetAll";
+         
+          const response = await axios.post(url,{
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('token')}`,
+              'Content-Type': 'application/json',
+            },
+          });         
+
           if (response.status === 200) {
             flightsRef.current=response.data;
-              setFlights(flightsRef.current);
+              setFlights(flightsRef.current);            
           } else {
-            /*   errorMessage('Error al cargar los vuelos'); */
+              errorMessage('Error al cargar los vuelos');
           }
-          setFlights(flightsData);
+         
       } catch (error) {          
           errorMessage('Error al cargar los vuelos');
       }
   };
   getFlights();
-  }, [dispatch])
+  }, [])
   
 
   const handleSearchChange = (event) => {
@@ -46,7 +52,7 @@ export const FlightCard =  () => {
     
     const filteredFlights =  flightsRef.current.filter(flight => 
       flight.origin.toLowerCase().includes(searchTerm) ||
-      flight.destination.toLowerCase().includes(searchTerm)
+      flight.destinity.toLowerCase().includes(searchTerm)
     );
     setFlights(filteredFlights);
   };
@@ -58,19 +64,40 @@ export const FlightCard =  () => {
       navegate('/Employee/EditFlight');
     }
 
-    const handleDelete= async (flight)=>{     
-      const url = "/api/authenticate";
-      const response = await dispatch(deleteData({ url,data:flight.id}));
+  const handleDelete = async (flight) => {
+    const responseUser = await alertMessage("¿Está seguro que desea eliminar este vuelo?");
+    if (responseUser) {
 
-      if(response.status===200){
-        correct('Vuelo eliminado con exito!')  
+      try {
+        const url = "http://localhost:5167/api/Flight/DeleteFlight";
+          
+      const  obj={
+          adminEmail:adminEmail,
+          idFlight:flight.idFlight
+        }
+        const response = await axios.delete(url, {
+          data: obj,
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json',
+          },
+        });      
+      
+      if (response.status === 200) {
+        correct("Vuelo eliminado con exito!");
         setTimeout(() => {
           window.location.reload();
-          }, 5000);    
-      }else{
-        errorMessage('Error al eliminar el vuelo')
+        }, 5000);
+      } else {
+        errorMessage("Error al eliminar el vuelo");
       }
+      } catch (error) {
+        
+      }
+      
+
     }
+  };
     
 
   return (
@@ -118,7 +145,7 @@ export const FlightCard =  () => {
             </div>
           </div>
           <div className="overflow-auto">
-            <table className="table table-responsive">
+            <table className="table table-responsive text-center">
               <thead>
                 <tr>
                   <th>Origen</th>
@@ -127,19 +154,21 @@ export const FlightCard =  () => {
                   <th>Hora de salida</th>
                   <th>Hora de llegada</th>
                   <th>Capacidad</th>
+                  <th>Precio</th>
                   <th className="text-right">Acción</th>
                   
                 </tr>
               </thead>
               <tbody>
                 {flights.map((flight) => (
-                  <tr key={flight.id}>
+                  <tr key={flight.idFlight}>
                     <td>{flight.origin}</td>
-                    <td>{flight.destination}</td>
-                    <td>{flight.date}</td>
+                    <td>{flight.destinity}</td>
+                    <td>{flight.dateTime}</td>
                     <td>{flight.departureTime}</td>
-                    <td>{flight.arrivalTime}</td>
+                    <td>{flight.arriveTime}</td>
                     <td>{flight.capacity}</td>
+                    <td>{flight.price}</td>
 
                     <td className="text-right">
                       <button 

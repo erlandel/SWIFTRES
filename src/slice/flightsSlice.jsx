@@ -4,26 +4,26 @@ export const flightsSlice = createSlice({
   name: 'flights',
   initialState: {
     origin: null,
-    destination: null,
-    date: null,
+    destinity: null,
+    dateTime: null,
     departureTime: null,
-    arrivalTime: null,   
+    arriveTime: null,   
     capacity:null,
     price: null,
-    id:null,
+    idFlight:null,
   },
   reducers: {
     setFlightsData: (state, action) => {
-      // Actualiza el estado con los datos recibidos de los vuelos
-      const { origin, destination, date, departureTime, arrivalTime,capacity,price,id } = action.payload;
+      
+      const { origin, destinity, dateTime, departureTime, arriveTime,capacity,price,idFlight } = action.payload;
       state.origin = origin;
-      state.destination = destination;
-      state.date = date;
+      state.destinity = destinity;
+      state.dateTime = dateTime;
       state.departureTime = departureTime;
-      state.arrivalTime = arrivalTime;
+      state.arriveTime = arriveTime;
       state.capacity=capacity;
       state.price = price;
-      state.id=id;     
+      state.idFlight=idFlight;     
     },
   },
 });

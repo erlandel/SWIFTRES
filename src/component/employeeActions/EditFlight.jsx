@@ -1,19 +1,19 @@
 import React, { useEffect, useState } from 'react'
 import { Link, useNavigate} from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 
 import { errorMessage } from '../messages/errorMessage';
 import { correct } from '../messages/correct';
 import { handleKeyDownString } from '../../functionValidation/handleKeyDownString';
 import { handleKeyDownNumber } from '../../functionValidation/handleKeyDownNumber';
 import { ToastContainerMessage } from '../messages/ToastContainerMessage';
-import { patchData } from '../../hooks/usePatchData';
+import axios from 'axios';
 
 
 export const EditFlight = () => {
 
   const flightData = useSelector(state => state.flights);
-  const dispatch=useDispatch();
+  const email=useSelector(state=>state.auth.email)
   const navegate = useNavigate();
 
   useEffect(() => {    
@@ -21,9 +21,7 @@ export const EditFlight = () => {
   
     if (flightToEdit) {
       const formattedFlight = {
-        ...flightToEdit,
-        departureTime: flightToEdit.departureTime ? flightToEdit.departureTime.slice(0, 5) : '',
-        arrivalTime: flightToEdit.arrivalTime ? flightToEdit.arrivalTime.slice(0, 5) : '',
+        ...flightToEdit,       
       };
   
       setValueForm(formattedFlight);       
@@ -33,21 +31,22 @@ export const EditFlight = () => {
   
 
   const [valueForm, setValueForm] = useState({
+    idFlight:'',
     origin: '',
-    destination: '',
-    date: '',
+    destinity: '',
+    dateTime: '',
     departureTime: '',
-    arrivalTime: '',
+    arriveTime: '',
     price: '',   
     capacity: '',
   });
   
  const [validationState, setValidationState] = useState({
   origin: true,
-  destination: true,   
-  date: true,
+  destinity: true,   
+  dateTime: true,
   departureTime:true,
-  arrivalTime: true,
+  arriveTime: true,
   price: true,  
   capacity: true,
  });
@@ -90,10 +89,28 @@ const handleSubmit = async (event) => {
     return; 
   }   
 
-  const url = "/api/authenticate";  
+  const url = "http://localhost:5167/api/Flight/UpdateFlights";  
 
-  const response = await dispatch(patchData({ url,data:valueForm }));
-  
+  const Flig={    
+    adminEmail: email,
+    origin: valueForm.origin,
+    destinity: valueForm.destinity,
+    capacity: valueForm.capacity,
+    dateTime: valueForm.dateTime,
+    departureTime: valueForm.departureTime,
+    arriveTime: valueForm.arriveTime,
+    price: valueForm.price,
+    idFlight:valueForm.idFlight
+  }
+
+  const response = await axios.patch(url,Flig,{
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('token')}`,
+      'Content-Type': 'application/json',
+    },
+  }); 
+
+
   if(response.status === 200){    
     correct('Vuelo actuaizado con exito!');  
     setTimeout(() => {
@@ -139,11 +156,11 @@ const handleSubmit = async (event) => {
                 <input
                   type="text"
                   name="destination"
-                  className={`form-control ${validationState.destination === false ? 'is-invalid' : ''}`}
+                  className={`form-control ${validationState.destinity === false ? 'is-invalid' : ''}`}
                   id="destination"
                   placeholder="----------"
                   required
-                  value={valueForm.destination}
+                  value={valueForm.destinity}
                   onChange={handleInputChange}
                   onKeyDown={handleKeyDownString}
                 />              
@@ -154,11 +171,11 @@ const handleSubmit = async (event) => {
                 <input
                   type="date"
                   name="date"
-                  className={`form-control ${validationState.date === false ? 'is-invalid' : ''}`}
+                  className={`form-control ${validationState.dateTime === false ? 'is-invalid' : ''}`}
                   id="date"
                   placeholder="Fecha"
                   required
-                  value={valueForm.date}
+                  value={valueForm.dateTime}
                   onChange={handleInputChange}
                   onKeyDown={handleKeyDownString}
                 />              
@@ -199,10 +216,10 @@ const handleSubmit = async (event) => {
                 <input
                   type="time"
                   name="arrivalTime"
-                  className={`form-control ${validationState.arrivalTime === false ? 'is-invalid' : ''}`}
+                  className={`form-control ${validationState.arriveTime === false ? 'is-invalid' : ''}`}
                   id="arrivalTime"                 
                   required
-                  value={valueForm.arrivalTime || ''}
+                  value={valueForm.arriveTime || ''}
                   onChange={handleInputChange}
                   onKeyDown={handleKeyDownString}
                 />              

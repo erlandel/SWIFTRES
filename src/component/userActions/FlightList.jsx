@@ -3,13 +3,9 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import es from 'date-fns/locale/es';
 import 'bootstrap/dist/css/bootstrap.min.css';
-
-
-import { flightsData } from "./functionUser/FlightsData";
+import axios from "axios";
 
 import { FlightLoader } from "./FlightLoader";
-import { useDispatch } from "react-redux";
-import { getData } from "../../hooks/useGetData";
 import { errorMessage } from "../messages/errorMessage";
 import '../../styles/userActions.css';
 import { ToastContainer } from "react-toastify";
@@ -19,19 +15,24 @@ export const FlightList = () => {
  const [selectedDate, setSelectedDate] = useState(null);
  const [searchOriginTerm, setSearchOriginTerm] = useState('');
  const [searchDestinationTerm, setSearchDestinationTerm] = useState('');
- const [flights, setFlights] = useState(flightsData);
- const dispatch = useDispatch();
+ const [flights, setFlights] = useState([]);
+
 
 
  useEffect(() => {
   const getFlights = async () => {
+    const url = `http://localhost:5167/api/Flight/GetAll`;
     try {
-        const url = "/api/authenticate";
-        const response = await dispatch(getData({ url }));
+        
+      const response = await axios.post(url, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });      
         if (response.status === 200) {
             setFlights(response.data);
         } else {
-           /*  errorMessage('Error al cargar los vuelos'); */
+            errorMessage('Error al cargar los vuelos');
         }
     } catch (error) {
         console.log(error);
@@ -39,18 +40,18 @@ export const FlightList = () => {
     }
 };
 getFlights();
-}, [dispatch])
+}, [])
  
 
- const handleDateChange = (date) => {
-    setSelectedDate(date);
+ const handleDateChange = (dateTime) => {
+    setSelectedDate(dateTime);
  };
 
  const handleSearchChange = (event) => {
     const { name, value } = event.target;
     if (name === 'origin') {
       setSearchOriginTerm(value);
-    } else if (name === 'destination') {
+    } else if (name === 'destinity') {
       setSearchDestinationTerm(value);
     }
  };
@@ -58,12 +59,12 @@ getFlights();
 
  // Filtrar los vuelos basado en la fecha seleccionada, origen y destino
  const filteredFlights = flights.filter(flight => {
-    const flightDate = new Date(flight.date);
+    const flightDate = new Date(flight.dateTime);
     const selectedDateFormatted = selectedDate ? selectedDate.toISOString().split('T')[0] : null;
     const dateMatches = !selectedDate || flightDate.toISOString().split('T')[0] === selectedDateFormatted;
 
     const originMatches = !searchOriginTerm || flight.origin.toLowerCase().includes(searchOriginTerm.toLowerCase());
-    const destinationMatches = !searchDestinationTerm || flight.destination.toLowerCase().includes(searchDestinationTerm.toLowerCase());
+    const destinationMatches = !searchDestinationTerm || flight.destinity.toLowerCase().includes(searchDestinationTerm.toLowerCase());
 
     return dateMatches && originMatches && destinationMatches;
  });
@@ -124,7 +125,7 @@ getFlights();
                           type="text"
                           className="form-control"
                           placeholder="Destino..."
-                          name="destination"
+                          name="destinity"
                           value={searchDestinationTerm}
                           onChange={handleSearchChange}
                         />

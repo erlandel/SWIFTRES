@@ -6,7 +6,7 @@ export const ProtectedRouterEmployee = () => {
   const isAuthenticated = useSelector(state => state.auth.isAuthenticated);
   const role = useSelector(state => state.auth.role);
 
-  if (!isAuthenticated || (role !== 'employee' && role !== 'administrator')) {
+  if (!isAuthenticated || (role !== 'employee' && role !== 'Admin')) {
     return <Navigate to="/" />;
   }
 

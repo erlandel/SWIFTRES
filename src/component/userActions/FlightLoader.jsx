@@ -34,8 +34,8 @@ export const FlightLoader = ({ flights }) => {
                 <div className="card-body d-flex justify-content-between align-items-start ">
                   <div>
                     <h6 className="card-title">Origen: {flight.origin}</h6>
-                    <h6 className="card-title">Destino: {flight.destination}</h6>
-                    <p className="card-text">Fecha: {flight.date}</p>
+                    <h6 className="card-title">Destino: {flight.destinity}</h6>
+                    <p className="card-text">Fecha: {flight.dateTime}</p>
                   </div>
                   <div className="text-right">
                     <p className="card-text">Precio: ${flight.price}</p>

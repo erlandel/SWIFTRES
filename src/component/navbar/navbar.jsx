@@ -7,6 +7,8 @@ import '../../styles/home.css';
 
 export const Navbar = () => {
 
+
+
   const isAuthenticated = useSelector(state => state.auth.isAuthenticated);
   const role = useSelector(state => state.auth.role);
   const email=useSelector(state=> state.auth.email);
@@ -14,6 +16,8 @@ export const Navbar = () => {
   const [showDropdown, setShowDropdown] = useState(false)
   const dispatch = useDispatch();
   const navigate=useNavigate();
+
+
 
   const handleClickUserSession=()=>{
     setShowDropdown(!showDropdown);
@@ -68,7 +72,7 @@ export const Navbar = () => {
             </li>
 
            
-            {isAuthenticated && (role === 'user' || role === 'employee' || role === 'administrator') && (   
+            {isAuthenticated && (role === 'User' || role === 'employee' || role === 'Admin') && (   
                <>
         <li className="nav-item">
             <NavLink 
@@ -91,7 +95,7 @@ export const Navbar = () => {
             </>
               )}
 
-            {isAuthenticated && (role === 'employee'|| role === 'administrator') && (
+            {isAuthenticated && (role === 'employee'|| role === 'Admin') && (
               <li className="nav-item">
                 <NavLink 
                     end
@@ -102,7 +106,7 @@ export const Navbar = () => {
               </li>
             )}
 
-            {isAuthenticated && role === 'administrator' && (
+            {isAuthenticated && role === 'Admin' && (
               <li className="nav-item">
                 <NavLink 
                     end

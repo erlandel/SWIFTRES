@@ -1,16 +1,15 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+
 
 import { validateEmail } from '../../functionValidation/validateEmail';
 import { ToastContainerMessage } from '../messages/ToastContainerMessage';
 import { errorMessage } from '../messages/errorMessage';
-import { postData } from '../../hooks/usePostData';
+import axios from 'axios';
 
 export const RecoverPassword = () => {
   const [email, setEmail] = useState('');
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
+  const navigate = useNavigate();  
 
   const handleEmail = async (e) => {
     e.preventDefault();
@@ -22,18 +21,29 @@ export const RecoverPassword = () => {
       return;
     }
 
-    const url='/api/authenticate';
-    const dataObjects ={email};
-    
-    const response = await dispatch(postData({ url,data:dataObjects }));
+    const url='http://localhost:5167/api/User/ChangePassword';
+     const object={
+      email
+     }
+ 
+
+   try {
+    const response = await axios.post(url, object, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
 
     if(response.status === 200){
       localStorage.setItem('email',email);
       navigate('/CodePassword');
     }else{
       errorMessage('Correo no encontrado!');
-    }
-     
+    }     
+
+   } catch (error) {
+    console.log(error);
+   }  
    
   };
   

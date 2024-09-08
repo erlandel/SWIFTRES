@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link} from 'react-router-dom';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom'
-import { useDispatch } from 'react-redux';
+
 
 import { useToggleShowPassword } from '../../actions/useToggleShowPassword';
 import { handleKeyDownString } from '../../functionValidation/handleKeyDownString';
@@ -10,18 +10,18 @@ import { errorMessage } from '../messages/errorMessage';
 import { correct } from '../messages/correct';
 import { onKeyDownCI } from '../../functionValidation/onKeyDownCI';
 import { ToastContainerMessage } from '../messages/ToastContainerMessage';
-import { postData } from '../../hooks/usePostData';
+import axios from 'axios';
+
 
 
 
 
 export const RegisterForm = () => {
   const navigate = useNavigate(); 
-  const dispatch = useDispatch();
   const { showPassword, toggleShowPassword } = useToggleShowPassword();
 
   const [valueForm, setValueForm] = useState({
-     name: '',
+    Username: '',
     lastName: '',   
     email: '',
     CI:'',
@@ -30,7 +30,7 @@ export const RegisterForm = () => {
   });
 
   const [validationState, setValidationState] = useState({
-    name: null,
+    Username: null,
     lastName: null,    
     email: null,
     CI:null,
@@ -99,13 +99,26 @@ export const RegisterForm = () => {
       return; 
     }   
 
-    const url='/api/authenticate';
+   
+    
+    
+    const url='http://localhost:5167/api/User/Register';
+   const data={
+    Username: valueForm.Username,
+    lastName: valueForm.lastName,   
+    email: valueForm.email,
+    CI:valueForm.CI,
+    password: valueForm.password,
+   }
+   try {
+    const response = await axios.post(url, data, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
 
-   
-   
-    const response = await dispatch(postData({ url,data: valueForm }));   
+    console.log('respuesta'+response)
 
-   
     if(response.status === 200){      
       correct('Confirmar correo al email!');  
 
@@ -115,7 +128,13 @@ export const RegisterForm = () => {
 
     }else{
       errorMessage('Registro incorrecto!');
-    }    
+    }
+   } catch (error) {
+    console.log('Error : '+error)
+   }
+    
+  
+        
   };
 
   return (
@@ -136,12 +155,12 @@ export const RegisterForm = () => {
               <div className="col-md-6 mb-2 position-relative">
                 <input
                   type="text"
-                  name="name"
+                  name="Username"
                   className={`form-control ${validationState.name === false ? 'is-invalid' : ''}`}
-                  id="name"
+                  id="Username"
                   placeholder="Nombre"
                   required
-                  value={valueForm.name}
+                  value={valueForm.Username}
                   onChange={handleInputChange}
                   onKeyDown={handleKeyDownString}
                 />

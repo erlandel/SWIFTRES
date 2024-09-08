@@ -1,18 +1,17 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 import { useToggleShowPassword } from '../../actions/useToggleShowPassword';
 import { errorMessage } from '../messages/errorMessage';
 import { ToastContainerMessage } from '../messages/ToastContainerMessage';
-import { useDispatch } from 'react-redux';
-import { patchData } from '../../hooks/usePatchData';
 import { correct } from '../messages/correct';
 import '../../styles/login.css';
 
 export const ChangePassword = () => {
 
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+ 
 
   const { showPassword, toggleShowPassword } = useToggleShowPassword();
 
@@ -62,21 +61,34 @@ export const ChangePassword = () => {
       return; 
     }    
 
-    const url = "/api/authenticate";
+    const url = "http://localhost:5167/api/User/ChangePassword";
     const password=valueForm.password;
     const email=localStorage.getItem('email');
     const dataObjects = { password,email};
 
-    const response = await dispatch(patchData({ url, data:dataObjects }));
-    
-    if(response.estatus === 200){
+ 
+
+   try {
+    const response = await axios.patch(url, dataObjects, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if(response.status === 200){
       correct('Cambio de contraseña exitoso!')
       setTimeout(() => {
         navigate('/Login');
       }, 500);      
     }else{
-      errorMessage('Error al actalizar!');
-    }    
+      errorMessage('Error al actualizar!');
+    }
+    
+   } catch (error) {
+    console.log(error);
+   }
+    
+      
   };
 
 
